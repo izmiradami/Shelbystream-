@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShelbyStream — Decentralized Video Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Shelby brand palette — synced with shelby.xyz */
+  --bg:        #04080F;
+  --surface:   #080E18;
+  --card:      #0D1520;
+  --card2:     #111B2A;
+  --border:    #172236;
+  --accent:    #2DD4BF;   /* Shelby teal */
+  --accent2:   #14B8A6;
+  --accent3:   #0D9488;
+  --gold:      #F59E0B;
+  --white:     #E8F4F8;
+  --muted:     #3D5A72;
+  --muted2:    #5A7A94;
+  --green:     #10B981;
+  --red:       #EF4444;
+  --syne:      'Syne', sans-serif;
+  --mono:      'IBM Plex Mono', monospace;
+  --body:      'Outfit', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle mesh background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(45,212,191,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(13,148,136,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(45,212,191,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAVBAR ── */
+nav {
+  position: fixed;
+  top:0; left:0; right:0;
+  z-index: 200;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  background: rgba(4,8,15,0.92);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: var(--syne);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--white);
+}
+
+.logo-mark {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: var(--bg);
+  box-shadow: 0 0 16px rgba(45,212,191,0.35);
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 0.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.25rem;
+}
+
+.nav-tab {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--muted2);
+  transition: all 0.2s;
+  border: none;
+  background: none;
+}
+
+.nav-tab.active, .nav-tab:hover {
+  background: var(--card2);
+  color: var(--accent);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.nav-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+}
+
+.wallet-btn {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 0.4rem 1rem;
+  background: rgba(45,212,191,0.1);
+  border: 1px solid rgba(45,212,191,0.3);
+  border-radius: 7px;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.wallet-btn:hover { background: rgba(45,212,191,0.18); }
+.wallet-btn.connected {
+  background: rgba(16,185,129,0.1);
+  border-color: rgba(16,185,129,0.3);
+  color: var(--green);
+}
+
+/* ── PAGES ── */
+.page { display: none; padding-top: 58px; }
+.page.active { display: block; }
+
+/* ══════════════════════════════
+   HOME PAGE
+══════════════════════════════ */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 5rem 2rem 3rem;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+@media(max-width:768px) {
+  .hero { grid-template-columns:1fr; padding: 4rem 1.5rem 2rem; gap:2rem; }
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.hero-eyebrow::before {
+  content:''; display:block;
+  width:20px; height:1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--syne);
+  font-size: clamp(2.6rem,4.5vw,4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.2rem;
+}
+
+.hero h1 .hl {
+  color: var(--accent);
+}
+
+.hero-desc {
+  font-size: 0.98rem;
+  color: var(--muted2);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+  max-width: 460px;
+}
+
+.hero-btns { display:flex; gap:0.8rem; flex-wrap:wrap; }
+
+.btn-primary {
+  font-family: var(--syne);
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.7rem 1.6rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  border: none;
+  border-radius: 8px;
+  color: var(--bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow: 0 8px 24px rgba(45,212,191,0.3); }
+
+.btn-ghost {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.7rem 1.3rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Upload card */
+.upload-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.upload-card::before {
+  content:'';
+  position:absolute;
+  top:-1px; left:25%; right:25%;
+  height:1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.upload-zone {
+  padding: 2.2rem 1.8rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+}
+.upload-zone:hover,.upload-zone.dragover { background: rgba(45,212,191,0.04); }
+.upload-zone input[type="file"] {
+  position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+  z-index:10;
+}
+
+.uz-icon {
+  width:56px; height:56px;
+  border-radius:14px;
+  background: rgba(45,212,191,0.1);
+  border: 1px solid rgba(45,212,191,0.2);
+  display:flex; align-items:center; justify-content:center;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+  transition: all 0.2s;
+}
+.upload-zone:hover .uz-icon { background: rgba(45,212,191,0.18); transform:scale(1.06); }
+.uz-title { font-family:var(--syne); font-weight:700; font-size:0.95rem; margin-bottom:0.35rem; }
+.uz-sub   { font-size:0.75rem; color:var(--muted2); }
+
+/* Progress */
+.upload-progress {
+  display:none;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.upload-progress.active { display:block; }
+
+.prog-row {
+  display:flex; justify-content:space-between;
+  font-family:var(--mono); font-size:0.7rem;
+  margin-bottom: 0.5rem;
+}
+.prog-name { color:var(--accent); }
+.prog-pct  { color:var(--green); }
+
+.prog-track {
+  height:3px; background:var(--border);
+  border-radius:3px; overflow:hidden; margin-bottom:0.7rem;
+}
+.prog-fill {
+  height:100%; width:0%;
+  background: linear-gradient(90deg, var(--accent3), var(--accent));
+  border-radius:3px; transition: width 0.1s linear;
+}
+
+.prog-steps { display:flex; flex-wrap:wrap; gap:0.5rem 1rem; }
+.pstep {
+  display:flex; align-items:center; gap:0.3rem;
+  font-family:var(--mono); font-size:0.62rem; color:var(--muted);
+  transition: color 0.3s;
+}
+.pstep.active { color:var(--accent); }
+.pstep.done   { color:var(--green); }
+.pstep-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+
+/* Blob result */
+.blob-result {
+  display:none;
+  padding: 0.9rem 1.5rem;
+  border-top: 1px solid rgba(45,212,191,0.12);
+  background: rgba(45,212,191,0.03);
+}
+.blob-result.active { display:block; }
+.blob-hdr {
+  font-family:var(--mono); font-size:0.65rem; color:var(--green);
+  margin-bottom:0.5rem;
+}
+.blob-row {
+  display:flex; align-items:center; gap:0.6rem;
+  background:var(--card2); border:1px solid var(--border);
+  border-radius:7px; padding:0.5rem 0.8rem;
+}
+.blob-val {
+  font-family:var(--mono); font-size:0.7rem; color:var(--accent);
+  flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.copy-btn {
+  font-family:var(--mono); font-size:0.63rem;
+  padding:0.2rem 0.5rem;
+  background: rgba(45,212,191,0.1); border:1px solid rgba(45,212,191,0.25);
+  border-radius:5px; color:var(--accent); cursor:pointer; transition:all 0.2s;
+}
+.copy-btn:hover { background: rgba(45,212,191,0.2); }
+
+/* Stats strip */
+.stats-strip {
+  position:relative; z-index:1;
+  max-width:1100px; margin:0 auto 3rem;
+  padding:0 2rem;
+  display:flex; gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+  border-radius:14px; overflow:hidden;
+}
+.stat-cell {
+  flex:1; background:var(--surface);
+  padding:1.1rem 1.5rem; text-align:center;
+}
+.stat-val {
+  font-family:var(--syne); font-size:1.5rem; font-weight:800;
+  color:var(--accent); display:block;
+}
+.stat-lbl { font-size:0.65rem; color:var(--muted2); margin-top:0.15rem; display:block; font-family:var(--mono); }
+
+/* Player */
+.player-section {
+  display:none;
+  position:relative; z-index:1;
+  max-width:1100px; margin:0 auto 3rem;
+  padding:0 2rem;
+}
+.player-section.active {
+  display:block;
+  animation: fadeInPlayer 0.4s ease both;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes fadeInPlayer {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.player-lbl {
+  font-family:var(--mono); font-size:0.65rem; color:var(--accent);
+  letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.8rem;
+  display:flex; align-items:center; gap:0.5rem;
+}
+.player-lbl::before {
+  content:''; display:block; width:6px; height:6px; border-radius:50%;
+  background:var(--accent); box-shadow:0 0 8px var(--accent);
+  animation: pulse 1.5s infinite;
+}
+.player-wrap {
+  background:#000; border-radius:20px; overflow:hidden;
+  border:1px solid rgba(45,212,191,0.25);
+  box-shadow: 0 0 0 1px rgba(45,212,191,0.08), 0 24px 60px rgba(0,0,0,0.7);
+  width:100%; height:0; padding-bottom:56.25%; position:relative;
+}
+.player-wrap video, .player-wrap img {
+  position:absolute; inset:0;
+  width:100%; height:100%; object-fit:contain; display:block;
+}
+.player-meta {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-top:1.2rem; flex-wrap:wrap; gap:1rem;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:1.2rem 1.4rem;
+}
+.player-title { font-family:var(--syne); font-weight:700; font-size:1.1rem; }
+.player-right { display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; }
+.player-blob  { font-family:var(--mono); font-size:0.65rem; color:var(--accent); }
+
+/* Price row */
+.price-row {
+  display:flex; align-items:center; gap:0.6rem; margin-top:0.4rem;
+}
+.price-badge {
+  font-family:var(--mono); font-size:0.68rem;
+  padding:0.25rem 0.6rem;
+  background: rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
+  border-radius:5px; color:var(--gold);
+}
+.on-chain-badge {
+  font-family:var(--mono); font-size:0.65rem;
+  padding:0.25rem 0.6rem;
+  background: rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2);
+  border-radius:5px; color:var(--green);
+}
+
+/* Feed */
+.feed-section {
+  position:relative; z-index:1;
+  max-width:1100px; margin:0 auto 5rem;
+  padding:0 2rem;
+}
+.feed-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:1.5rem;
+}
+.feed-title { font-family:var(--syne); font-weight:700; font-size:1.1rem; }
+.feed-tag   { font-family:var(--mono); font-size:0.65rem; color:var(--muted2); }
+
+.feed-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+  gap:1.2rem;
+}
+
+.feed-empty {
+  grid-column:1/-1; text-align:center;
+  padding:4rem 2rem;
+  color:var(--muted); font-family:var(--mono); font-size:0.78rem;
+  border:1px dashed var(--border); border-radius:14px;
+}
+
+.video-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; overflow:hidden; cursor:pointer;
+  transition:all 0.22s ease;
+  animation:slideUp 0.35s ease both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.video-card:hover {
+  border-color: rgba(45,212,191,0.35);
+  transform:translateY(-4px);
+  box-shadow:0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(45,212,191,0.08);
+}
+
+.vthumb {
+  position:relative; aspect-ratio:16/9;
+  background:var(--surface); overflow:hidden;
+}
+.vthumb video,.vthumb img {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.vthumb-ph {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.8rem;
+  background:linear-gradient(135deg,#080E18,#111B2A);
+}
+.play-ov {
+  position:absolute; inset:0;
+  background:rgba(0,0,0,0);
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.2s;
+}
+.video-card:hover .play-ov { background:rgba(0,0,0,0.45); }
+.play-btn-circle {
+  width:46px; height:46px; border-radius:50%;
+  background: linear-gradient(135deg,var(--accent),var(--accent3));
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transform:scale(0.6);
+  transition:all 0.2s;
+  box-shadow:0 4px 20px rgba(45,212,191,0.45);
+}
+.video-card:hover .play-btn-circle { opacity:1; transform:scale(1); }
+.play-btn-circle::after {
+  content:''; width:0; height:0;
+  border-style:solid; border-width:7px 0 7px 13px;
+  border-color:transparent transparent transparent var(--bg);
+  margin-left:3px;
+}
+.vduration {
+  position:absolute; bottom:0.4rem; right:0.5rem;
+  font-family:var(--mono); font-size:0.6rem;
+  background:rgba(0,0,0,0.8); color:white;
+  padding:0.12rem 0.38rem; border-radius:4px;
+}
+.delete-card-btn {
+  position:absolute; top:0.4rem; right:0.4rem;
+  background:rgba(239,68,68,0.85); border:none;
+  border-radius:6px; color:white;
+  font-size:0.65rem; font-family:var(--mono);
+  padding:0.22rem 0.5rem; cursor:pointer;
+  opacity:0; transition:opacity 0.2s;
+  z-index:10; backdrop-filter:blur(4px);
+}
+.video-card:hover .delete-card-btn { opacity:1; }
+
+.vprice-tag {
+  position:absolute; top:0.4rem; left:0.5rem;
+  font-family:var(--mono); font-size:0.6rem;
+  background:rgba(245,158,11,0.9); color:#000;
+  padding:0.12rem 0.4rem; border-radius:4px; font-weight:500;
+}
+
+.vbody { padding:0.85rem 1rem; }
+.vtitle {
+  font-family:var(--syne); font-weight:600; font-size:0.88rem;
+  margin-bottom:0.5rem;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.vmeta { display:flex; align-items:center; justify-content:space-between; gap:0.5rem; }
+.vblob { font-family:var(--mono); font-size:0.62rem; color:var(--muted2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:55%; }
+.vbadges { display:flex; gap:0.4rem; align-items:center; }
+.vbadge-chain {
+  font-family:var(--mono); font-size:0.58rem;
+  padding:0.15rem 0.42rem;
+  background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2);
+  border-radius:4px; color:var(--green); white-space:nowrap;
+}
+.vbadge-price {
+  font-family:var(--mono); font-size:0.58rem;
+  padding:0.15rem 0.42rem;
+  background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2);
+  border-radius:4px; color:var(--gold); white-space:nowrap;
+}
+
+/* ══════════════════════════════
+   PROFILE PAGE
+══════════════════════════════ */
+.profile-page {
+  position:relative; z-index:1;
+  max-width:1100px; margin:0 auto;
+  padding:3rem 2rem 5rem;
+}
+
+.profile-header {
+  display:grid; grid-template-columns:auto 1fr auto;
+  gap:2rem; align-items:center;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:20px; padding:2rem;
+  margin-bottom:2.5rem; position:relative; overflow:hidden;
+}
+
+.profile-header::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--accent3), var(--accent), transparent);
+}
+
+.profile-avatar {
+  width:72px; height:72px; border-radius:18px;
+  background:linear-gradient(135deg,var(--accent3),var(--accent));
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; box-shadow:0 0 24px rgba(45,212,191,0.25);
+}
+
+.profile-info {}
+.profile-addr {
+  font-family:var(--mono); font-size:0.75rem; color:var(--accent);
+  margin-bottom:0.35rem;
+}
+.profile-name { font-family:var(--syne); font-weight:800; font-size:1.4rem; margin-bottom:0.5rem; }
+.profile-tags { display:flex; gap:0.5rem; flex-wrap:wrap; }
+.profile-tag {
+  font-family:var(--mono); font-size:0.62rem;
+  padding:0.2rem 0.55rem;
+  border:1px solid var(--border); border-radius:5px; color:var(--muted2);
+}
+
+.profile-stats { display:flex; flex-direction:column; gap:0.8rem; align-items:flex-end; }
+.ps-item { text-align:right; }
+.ps-val { font-family:var(--syne); font-weight:700; font-size:1.3rem; color:var(--accent); display:block; }
+.ps-lbl { font-family:var(--mono); font-size:0.62rem; color:var(--muted2); }
+
+/* Earnings dashboard */
+.earnings-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem; margin-bottom:2.5rem;
+}
+
+.earn-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:1.4rem;
+  position:relative; overflow:hidden;
+  transition:all 0.2s;
+}
+.earn-card:hover { border-color:rgba(45,212,191,0.3); }
+.earn-card::after {
+  content:''; position:absolute;
+  bottom:0; left:0; right:0; height:2px;
+}
+.earn-card.teal::after   { background:linear-gradient(90deg,var(--accent3),var(--accent)); }
+.earn-card.gold::after   { background:linear-gradient(90deg,#B45309,var(--gold)); }
+.earn-card.green::after  { background:linear-gradient(90deg,#047857,var(--green)); }
+.earn-card.purple::after { background:linear-gradient(90deg,#6D28D9,#A78BFA); }
+
+.earn-icon { font-size:1.4rem; margin-bottom:0.8rem; display:block; }
+.earn-label { font-family:var(--mono); font-size:0.65rem; color:var(--muted2); margin-bottom:0.4rem; display:block; }
+.earn-val { font-family:var(--syne); font-weight:800; font-size:1.6rem; display:block; }
+.earn-card.teal   .earn-val { color:var(--accent); }
+.earn-card.gold   .earn-val { color:var(--gold); }
+.earn-card.green  .earn-val { color:var(--green); }
+.earn-card.purple .earn-val { color:#A78BFA; }
+.earn-sub { font-family:var(--mono); font-size:0.6rem; color:var(--muted); margin-top:0.3rem; display:block; }
+
+/* Tx history */
+.tx-section { margin-bottom:2.5rem; }
+.section-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:1rem;
+}
+.section-title { font-family:var(--syne); font-weight:700; font-size:0.95rem; }
+.section-tag   { font-family:var(--mono); font-size:0.62rem; color:var(--muted2); }
+
+.tx-list { display:flex; flex-direction:column; gap:0.6rem; }
+.tx-item {
+  display:flex; align-items:center; gap:1rem;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:0.85rem 1.1rem;
+  transition:all 0.2s;
+}
+.tx-item:hover { border-color:rgba(45,212,191,0.2); }
+.tx-icon {
+  width:34px; height:34px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.95rem; flex-shrink:0;
+}
+.tx-icon.earn  { background:rgba(16,185,129,0.12); }
+.tx-icon.store { background:rgba(45,212,191,0.12); }
+.tx-details { flex:1; }
+.tx-desc { font-size:0.82rem; font-weight:500; }
+.tx-id   { font-family:var(--mono); font-size:0.62rem; color:var(--muted2); margin-top:0.15rem; }
+.tx-amount { font-family:var(--mono); font-size:0.82rem; font-weight:500; }
+.tx-amount.pos { color:var(--green); }
+.tx-amount.neg { color:var(--muted2); }
+.tx-time { font-family:var(--mono); font-size:0.6rem; color:var(--muted); }
+
+/* My videos tab in profile */
+.profile-videos-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:1rem;
+}
+
+/* ══════════════════════════════
+   PAY MODAL
+══════════════════════════════ */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(10px);
+  z-index:600;
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+
+.modal-box {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:20px; padding:2rem; width:360px;
+  animation:slideUp 0.25s ease; position:relative; overflow:hidden;
+}
+.modal-box::before {
+  content:''; position:absolute;
+  top:0; left:20%; right:20%; height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+
+.modal-hdr {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:1.4rem;
+}
+.modal-ttl { font-family:var(--syne); font-weight:700; font-size:1rem; }
+.modal-cls {
+  background:none; border:none; color:var(--muted2);
+  font-size:1rem; cursor:pointer; transition:color 0.2s;
+}
+.modal-cls:hover { color:var(--white); }
+
+/* Wallet option */
+.wallet-opt {
+  display:flex; align-items:center; gap:1rem;
+  padding:1rem; border:1px solid var(--border);
+  border-radius:10px; cursor:pointer; transition:all 0.2s;
+  margin-bottom:0.8rem;
+}
+.wallet-opt:hover {
+  border-color:var(--accent);
+  background:rgba(45,212,191,0.05);
+}
+.wopt-name { font-weight:500; font-size:0.88rem; }
+.wopt-sub  { font-size:0.7rem; color:var(--muted2); margin-top:0.15rem; }
+.wopt-rec  { margin-left:auto; font-family:var(--mono); font-size:0.6rem; color:var(--green); }
+
+/* Pay modal */
+.pay-video-info {
+  display:flex; align-items:center; gap:1rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:1rem; margin-bottom:1.4rem;
+}
+.pay-thumb {
+  width:64px; height:40px; border-radius:7px;
+  background:var(--card2); display:flex; align-items:center;
+  justify-content:center; font-size:1.5rem; flex-shrink:0;
+  overflow:hidden;
+}
+.pay-thumb video,.pay-thumb img { width:100%; height:100%; object-fit:cover; }
+.pay-title { font-weight:600; font-size:0.85rem; margin-bottom:0.25rem; }
+.pay-meta  { font-family:var(--mono); font-size:0.65rem; color:var(--muted2); }
+
+.pay-amount-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:1.2rem; text-align:center; margin-bottom:1.4rem;
+}
+.pay-amount-val {
+  font-family:var(--syne); font-weight:800; font-size:2rem;
+  color:var(--gold); display:block;
+}
+.pay-amount-lbl { font-family:var(--mono); font-size:0.65rem; color:var(--muted2); margin-top:0.25rem; display:block; }
+.pay-channel-note { font-family:var(--mono); font-size:0.6rem; color:var(--accent); margin-top:0.3rem; display:block; }
+
+.pay-btn {
+  width:100%; padding:0.85rem;
+  background:linear-gradient(135deg,var(--accent3),var(--accent));
+  border:none; border-radius:10px;
+  font-family:var(--syne); font-weight:700; font-size:0.9rem;
+  color:var(--bg); cursor:pointer; transition:all 0.2s;
+}
+.pay-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(45,212,191,0.3); }
+
+.pay-secure {
+  display:flex; align-items:center; justify-content:center;
+  gap:0.4rem; margin-top:0.8rem;
+  font-family:var(--mono); font-size:0.6rem; color:var(--muted);
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:2rem; right:2rem;
+  background:var(--card2); border:1px solid var(--border);
+  border-radius:10px; padding:0.8rem 1.2rem;
+  font-family:var(--mono); font-size:0.75rem;
+  z-index:9000; max-width:300px;
+  transform:translateY(80px); opacity:0;
+  transition:all 0.3s ease;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+
+/* ── FOOTER ── */
+footer {
+  position:relative; z-index:1;
+  border-top:1px solid var(--border);
+  padding:1.8rem 2rem; text-align:center;
+  font-family:var(--mono); font-size:0.68rem; color:var(--muted2);
+}
+footer a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-mark">S</div>
+    ShelbyStream
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('home')">Home</button>
+    <button class="nav-tab" onclick="showPage('profile')">Profile</button>
+  </div>
+  <div class="nav-right">
+    <span class="nav-tag">testnet · aptos</span>
+    <button class="wallet-btn" id="walletBtn" onclick="openWalletModal()">Connect Petra</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- WALLET MODAL -->
+<div class="modal-overlay" id="walletModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="modal-ttl">Connect Wallet</span>
+      <button class="modal-cls" onclick="closeModal('walletModal')">✕</button>
+    </div>
+    <div class="wallet-opt" onclick="connectPetra()">
+      <span style="font-size:2rem;">🦊</span>
+      <div>
+        <div class="wopt-name">Petra Wallet</div>
+        <div class="wopt-sub">Aptos native wallet</div>
+      </div>
+      <span class="wopt-rec">recommended</span>
+    </div>
+  </div>
+</div>
+
+<!-- PAY MODAL -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="modal-ttl">Watch this video</span>
+      <button class="modal-cls" onclick="closeModal('payModal')">✕</button>
+    </div>
+    <div class="pay-video-info">
+      <div class="pay-thumb" id="payThumb"></div>
+      <div>
+        <div class="pay-title" id="payTitle"></div>
+        <div class="pay-meta" id="payMeta"></div>
+      </div>
+    </div>
+    <div class="pay-amount-box">
+      <span class="pay-amount-val" id="payAmount"></span>
+      <span class="pay-amount-lbl">APT · one-time payment</span>
+      <span class="pay-channel-note">via Shelby micropayment channel</span>
+    </div>
+    <button class="pay-btn" onclick="confirmPayment()">Pay with Petra 🦊</button>
+    <div class="pay-secure">🔒 secured by aptos blockchain</div>
+  </div>
+</div>
+
+<!-- ══ HOME PAGE ══ -->
+<div class="page active" id="page-home">
+
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Powered by Shelby Protocol</div>
+      <h1>Stream.<br>Own.<br><span class="hl">Earn.</span></h1>
+      <p class="hero-desc">The first decentralized video platform on Shelby's high-performance blob storage. Upload once, stream forever. Earn APT every time someone watches.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="document.getElementById('fileInput').click()">↑ Upload Video</button>
+        <button class="btn-ghost" onclick="document.querySelector('.feed-section').scrollIntoView({behavior:'smooth'})">Browse →</button>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="upload-card">
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="video/*,image/*" multiple>
+          <div class="uz-icon">▲</div>
+          <div class="uz-title">Drop your video here</div>
+          <div class="uz-sub">MP4, MOV, AVI · Any size · Multiple files</div>
+        </div>
+
+        <div class="upload-progress" id="uploadProgress">
+          <div class="prog-row">
+            <span class="prog-name" id="progressFilename">uploading...</span>
+            <span class="prog-pct" id="progressPct">0%</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="progressFill"></div></div>
+          <div class="prog-steps">
+            <div class="pstep" id="ps1"><div class="pstep-dot"></div>erasure coding</div>
+            <div class="pstep" id="ps2"><div class="pstep-dot"></div>chunking</div>
+            <div class="pstep" id="ps3"><div class="pstep-dot"></div>SP nodes</div>
+            <div class="pstep" id="ps4"><div class="pstep-dot"></div>aptos commit</div>
+            <div class="pstep" id="ps5"><div class="pstep-dot"></div>finalized</div>
+          </div>
+        </div>
+
+        <div class="blob-result" id="blobResult">
+          <div class="blob-hdr">✓ stored on shelby · earning enabled</div>
+          <div class="blob-row">
+            <span class="blob-val" id="blobIdVal"></span>
+            <button class="copy-btn" onclick="copyBlobId()">copy</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-top:0.6rem;">
+            <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted2);">price per view:</span>
+            <span id="blobPrice" style="font-family:var(--mono);font-size:0.78rem;color:var(--gold);font-weight:600;"></span>
+            <span style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-left:auto;">via micropayment channel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="stat-cell">
+      <span class="stat-val" id="statVideos">0</span>
+      <span class="stat-lbl">videos stored</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val" id="statSize">0 MB</span>
+      <span class="stat-lbl">total size</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val" id="statEarned" style="color:var(--gold)">0 APT</span>
+      <span class="stat-lbl">total earned</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">∞</span>
+      <span class="stat-lbl">availability</span>
+    </div>
+  </div>
+
+  <!-- Player -->
+  <section class="player-section" id="playerSection">
+    <div class="player-lbl">// now playing</div>
+    <div class="player-wrap" id="playerWrap">
+      <video id="mainPlayer" controls></video>
+    </div>
+    <div class="player-meta">
+      <div>
+        <div class="player-title" id="playerTitle">—</div>
+        <div class="player-blob" id="playerBlob">—</div>
+      </div>
+      <div class="player-right">
+        <span class="on-chain-badge">on-chain ✓</span>
+        <span class="price-badge" id="playerPrice">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feed -->
+  <section class="feed-section">
+    <div class="feed-hdr">
+      <span class="feed-title">Your Channel</span>
+      <span class="feed-tag">// shelby network</span>
+    </div>
+    <div class="feed-grid" id="feedGrid">
+      <div class="feed-empty">// no videos yet · upload above to start earning</div>
+    </div>
+  </section>
+
+  <footer>
+    ShelbyStream · built on <a href="https://shelby.xyz" target="_blank">shelby protocol</a> · aptos testnet
+  </footer>
+</div>
+
+<!-- ══ PROFILE PAGE ══ -->
+<div class="page" id="page-profile">
+  <div class="profile-page">
+
+    <div class="profile-header">
+      <div class="profile-avatar">🦊</div>
+      <div class="profile-info">
+        <div class="profile-addr" id="profileAddr">not connected</div>
+        <div class="profile-name" id="profileName">Connect wallet to view profile</div>
+        <div class="profile-tags">
+          <span class="profile-tag">creator</span>
+          <span class="profile-tag">aptos testnet</span>
+          <span class="profile-tag">shelby early access</span>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="ps-item">
+          <span class="ps-val" id="psVideos">0</span>
+          <span class="ps-lbl">videos</span>
+        </div>
+        <div class="ps-item">
+          <span class="ps-val" id="psEarned" style="color:var(--gold)">0 APT</span>
+          <span class="ps-lbl">earned</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Earnings dashboard -->
+    <div class="section-hdr" style="margin-bottom:1rem;">
+      <span class="section-title">Earnings Dashboard</span>
+      <span class="section-tag">// live · aptos testnet</span>
+    </div>
+    <div class="earnings-grid" style="margin-bottom:2.5rem;">
+      <div class="earn-card teal">
+        <span class="earn-icon">💰</span>
+        <span class="earn-label">total earned</span>
+        <span class="earn-val" id="ecTotal">0.000 APT</span>
+        <span class="earn-sub">≈ $0.00 USD</span>
+      </div>
+      <div class="earn-card gold">
+        <span class="earn-icon">▶</span>
+        <span class="earn-label">total plays</span>
+        <span class="earn-val" id="ecPlays">0</span>
+        <span class="earn-sub">across all videos</span>
+      </div>
+      <div class="earn-card green">
+        <span class="earn-icon">⚡</span>
+        <span class="earn-label">avg per play</span>
+        <span class="earn-val" id="ecAvg">0.000 APT</span>
+        <span class="earn-sub">micropayment channel</span>
+      </div>
+      <div class="earn-card purple">
+        <span class="earn-icon">📦</span>
+        <span class="earn-label">storage used</span>
+        <span class="earn-val" id="ecStorage">0 MB</span>
+        <span class="earn-sub">on shelby network</span>
+      </div>
+    </div>
+
+    <!-- Tx history -->
+    <div class="tx-section">
+      <div class="section-hdr">
+        <span class="section-title">Transaction History</span>
+        <span class="section-tag">// aptos blockchain</span>
+      </div>
+      <div class="tx-list" id="txList">
+        <div style="text-align:center;padding:2rem;color:var(--muted);font-family:var(--mono);font-size:0.75rem;border:1px dashed var(--border);border-radius:10px;">
+          // no transactions yet
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile videos -->
+    <div class="section-hdr">
+      <span class="section-title">Your Videos</span>
+      <span class="section-tag" id="profileVideoCount">// 0 videos</span>
+    </div>
+    <div class="profile-videos-grid" id="profileVideosGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted);font-family:var(--mono);font-size:0.75rem;border:1px dashed var(--border);border-radius:10px;">
+        // upload videos to see them here
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let videos    = [];
+  let totalMB   = 0;
+  let totalAPT  = 0;
+  let totalPlays = 0;
+  let txHistory = [];
+  let currentBlobId = "";
+  let walletConnected = false;
+  let walletAddr = "";
+  let pendingVideo = null;
+
+  // ── UTILS ──
+  function randHex(n) {
+    return Array.from({length:n}, () => "0123456789abcdef"[Math.floor(Math.random()*16)]).join('');
+  }
+  function genBlobId() { return "0x" + randHex(6) + "..." + randHex(6); }
+  function genTxId()   { return "0x" + randHex(10); }
+  function fmtBytes(b) {
+    if (b < 1024*1024) return (b/1024).toFixed(1)+" KB";
+    if (b < 1024*1024*1024) return (b/1024/1024).toFixed(2)+" MB";
+    return (b/1024/1024/1024).toFixed(2)+" GB";
+  }
+  function fmtDur(s) {
+    const m=Math.floor(s/60), sec=Math.floor(s%60);
+    return m+":"+String(sec).padStart(2,'0');
+  }
+  function randPrice() {
+    return (Math.random()*0.08+0.005).toFixed(3);
+  }
+  function timeAgo() {
+    const mins = Math.floor(Math.random()*120)+1;
+    return mins < 60 ? mins+"m ago" : Math.floor(mins/60)+"h ago";
+  }
+
+  // ── PAGES ──
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    document.querySelectorAll('.nav-tab').forEach((t,i) => {
+      t.classList.toggle('active', ['home','profile'][i] === name);
+    });
+    if (name === 'profile') updateProfile();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // ── WALLET ──
+  function openWalletModal() {
+    if (walletConnected) {
+      walletConnected = false; walletAddr = "";
+      document.getElementById('walletBtn').textContent = "Connect Petra";
+      document.getElementById('walletBtn').classList.remove('connected');
+      showToast("Wallet disconnected", "muted");
+      updateProfile();
+    } else {
+      document.getElementById('walletModal').classList.add('open');
+    }
+  }
+
+  function connectPetra() {
+    closeModal('walletModal');
+    walletAddr = "0x" + randHex(4) + "..." + randHex(4);
+    walletConnected = true;
+    const btn = document.getElementById('walletBtn');
+    btn.textContent = "🦊 " + walletAddr;
+    btn.classList.add('connected');
+    showToast("🦊 Petra connected · " + walletAddr, "teal");
+    updateProfile();
+  }
+
+  // ── RENDER FEED ──
+  function renderFeed() {
+    const grid = document.getElementById('feedGrid');
+    document.getElementById('statVideos').textContent = videos.length;
+    document.getElementById('statSize').textContent   = totalMB.toFixed(1)+" MB";
+    document.getElementById('statEarned').textContent = totalAPT.toFixed(3)+" APT";
+
+    if (videos.length === 0) {
+      grid.innerHTML = '<div class="feed-empty">// no videos yet · upload above to start earning</div>';
+      return;
+    }
+    grid.innerHTML = "";
+    videos.forEach((v,i) => {
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      card.style.animationDelay = (i*0.06)+'s';
+
+      // Build card without embedding base64 in innerHTML
+      card.innerHTML = `
+        <div class="vthumb" data-idx="${i}">
+          <div class="vthumb-ph">${v.type==='video' ? '🎬' : '🖼️'}</div>
+          <div class="play-ov"><div class="play-btn-circle"></div></div>
+          ${v.duration ? `<span class="vduration">${v.duration}</span>` : ''}
+          ${v.price ? `<span class="vprice-tag">${v.price} APT</span>` : ''}
+          <button class="delete-card-btn" data-del="${i}">✕</button>
+        </div>
+        <div class="vbody">
+          <div class="vtitle">${v.name}</div>
+          <div class="vmeta">
+            <span class="vblob">${v.blob}</span>
+            <div class="vbadges">
+              <span class="vbadge-chain">on-chain ✓</span>
+              <span class="vbadge-price">${v.price} APT</span>
+            </div>
+          </div>
+        </div>`;
+
+      // Set thumbnail via DOM after innerHTML (safe for large base64)
+      if (v.preview) {
+        const thumbWrap = card.querySelector('.vthumb');
+        const ph = thumbWrap.querySelector('.vthumb-ph');
+        if (v.type === 'video') {
+          const tv = document.createElement('video');
+          tv.muted = true;
+          tv.preload = 'metadata';
+          tv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+          tv.src = v.preview;
+          thumbWrap.style.position = 'relative';
+          thumbWrap.insertBefore(tv, ph);
+          ph.style.display = 'none';
+        } else {
+          const ti = document.createElement('img');
+          ti.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+          ti.src = v.preview;
+          thumbWrap.style.position = 'relative';
+          thumbWrap.insertBefore(ti, ph);
+          ph.style.display = 'none';
+        }
+      }
+
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.delete-card-btn')) return;
+        handleVideoClick(v);
+      });
+
+      card.querySelector('.delete-card-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        videos.splice(i, 1);
+        totalMB -= parseFloat(v.size);
+        renderFeed();
+        updateProfile();
+        showToast("✕ " + v.name + " removed", "muted");
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  // ── VIDEO CLICK — pay gate ──
+  function handleVideoClick(v) {
+    pendingVideo = v;
+
+    if (!walletConnected) {
+      // No wallet — play directly without payment for demo
+      playVideo(v);
+      return;
+    }
+
+    // Wallet connected — show pay modal
+    const thumbEl = document.getElementById('payThumb');
+    thumbEl.innerHTML = '';
+    if (v.preview) {
+      const el = v.type === 'video' ? document.createElement('video') : document.createElement('img');
+      el.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:7px;';
+      if (v.type === 'video') { el.muted = true; el.autoplay = false; }
+      thumbEl.appendChild(el);
+      el.src = v.preview;
+    } else {
+      thumbEl.textContent = '🎬';
+    }
+    document.getElementById('payTitle').textContent  = v.name;
+    document.getElementById('payMeta').textContent   = v.size + ' · ' + v.blob;
+    document.getElementById('payAmount').textContent = v.price + ' APT';
+    document.getElementById('payModal').classList.add('open');
+  }
+
+  function confirmPayment() {
+    closeModal('payModal');
+    if (!pendingVideo) return;
+    const v = pendingVideo;
+
+    // Earn APT
+    const earned = parseFloat(v.price);
+    totalAPT += earned;
+    totalPlays++;
+
+    // Add tx
+    const tx = {
+      type: 'earn',
+      desc: 'Payment received · ' + v.name,
+      id:   genTxId(),
+      amount: '+' + v.price + ' APT',
+      time: 'just now'
+    };
+    txHistory = [tx, ...txHistory];
+
+    // Play video
+    playVideo(v);
+    updateStats();
+    showToast("✓ Payment confirmed · +" + v.price + " APT earned", "teal");
+    pendingVideo = null;
+  }
+
+  function playVideo(v) {
+    const section = document.getElementById('playerSection');
+    const wrap    = document.getElementById('playerWrap');
+
+    section.classList.remove('active');
+    void section.offsetWidth;
+    section.classList.add('active');
+
+    wrap.innerHTML = '';
+
+    // Always show preview as background
+    if (v.preview) {
+      if (v.type === 'image') {
+        const img = document.createElement('img');
+        img.src = v.preview;
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;';
+        wrap.appendChild(img);
+      } else {
+        // Video thumbnail — use canvas to capture first frame
+        const tmpVid = document.createElement('video');
+        tmpVid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;opacity:0.85;';
+        tmpVid.muted = true;
+        tmpVid.preload = 'auto';
+        wrap.appendChild(tmpVid);
+        tmpVid.src = v.preview;
+
+        // Streaming overlay on top of thumbnail
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8rem;background:rgba(4,8,15,0.55);backdrop-filter:blur(2px);';
+        overlay.innerHTML = `
+          <div style="position:relative;width:72px;height:72px;">
+            <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(45,212,191,0.25);animation:spin 3s linear infinite;"></div>
+            <div style="position:absolute;inset:7px;border-radius:50%;border:2px solid rgba(45,212,191,0.5);animation:spin 1.8s linear infinite reverse;"></div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+              <div style="width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent #2DD4BF;margin-left:4px;filter:drop-shadow(0 0 8px rgba(45,212,191,0.8));"></div>
+            </div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#2DD4BF;text-align:center;text-shadow:0 0 12px rgba(45,212,191,0.5);">
+            streaming from shelby network
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:rgba(45,212,191,0.5);">${v.blob}</div>
+          <div style="display:flex;gap:0.35rem;align-items:center;margin-top:0.2rem;">
+            <div style="width:5px;height:5px;border-radius:50%;background:#2DD4BF;animation:pulse 1s infinite;"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#2DD4BF;animation:pulse 1s 0.3s infinite;"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#2DD4BF;animation:pulse 1s 0.6s infinite;"></div>
+          </div>`;
+        wrap.appendChild(overlay);
+      }
+    }
+
+    document.getElementById('playerTitle').textContent = v.name;
+    document.getElementById('playerBlob').textContent  = v.blob;
+    document.getElementById('playerPrice').textContent = v.price + ' APT';
+
+    setTimeout(() => {
+      const top = section.getBoundingClientRect().top + window.scrollY - 70;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }, 100);
+  }
+
+  // ── UPLOAD ──
+  function uploadQueue(files) {
+    let i = 0;
+    function next() {
+      if (i >= files.length) return;
+      simulateUpload(files[i], () => { i++; setTimeout(next, 600); });
+    }
+    next();
+  }
+
+  function simulateUpload(file, onDone) {
+    const prog   = document.getElementById('uploadProgress');
+    const blobEl = document.getElementById('blobResult');
+    const fill   = document.getElementById('progressFill');
+    const pct    = document.getElementById('progressPct');
+    const fn     = document.getElementById('progressFilename');
+
+    prog.classList.add('active');
+    blobEl.classList.remove('active');
+    fn.textContent  = file.name;
+    pct.textContent = '0%';
+    fill.style.width = '0%';
+    ['ps1','ps2','ps3','ps4','ps5'].forEach(id => document.getElementById(id).className='pstep');
+
+    let p = 0;
+    const thresholds = [18,42,62,84,100];
+    const stepIds    = ['ps1','ps2','ps3','ps4','ps5'];
+
+    const timer = setInterval(() => {
+      p += Math.random()*3.5+1.5;
+      if (p>100) p=100;
+      fill.style.width = p+'%';
+      pct.textContent  = Math.round(p)+'%';
+
+      thresholds.forEach((t,idx) => {
+        const el = document.getElementById(stepIds[idx]);
+        if (p>=t) el.classList.add('done');
+        else if (p>=(thresholds[idx-1]||0)) el.classList.add('active');
+      });
+
+      if (p>=100) {
+        clearInterval(timer);
+        currentBlobId = genBlobId();
+        document.getElementById('blobIdVal').textContent = currentBlobId;
+        blobEl.classList.add('active');
+        setTimeout(() => prog.classList.remove('active'), 1600);
+
+        const isVideo = file.type.startsWith('video');
+        const price   = randPrice();
+        document.getElementById('blobPrice').textContent = price + ' APT';
+
+        // Use FileReader base64 for sandbox compatibility
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const dataUrl = ev.target.result;
+          const newV = {
+            name:    file.name,
+            size:    fmtBytes(file.size),
+            type:    isVideo ? 'video' : 'image',
+            preview: dataUrl,
+            blob:    currentBlobId,
+            price:   price,
+            duration:null,
+            plays:   0
+          };
+
+          if (isVideo) {
+            const tmp = document.createElement('video');
+            tmp.src = dataUrl;
+            tmp.onloadedmetadata = () => { newV.duration = fmtDur(tmp.duration); renderFeed(); updateProfile(); };
+          }
+
+          videos = [newV, ...videos];
+          totalMB += file.size/(1024*1024);
+
+          txHistory = [{
+            type:'store', desc:'Stored on Shelby · '+file.name,
+            id:genTxId(), amount:'—', time:'just now'
+          }, ...txHistory];
+
+          renderFeed(); updateStats(); updateProfile();
+          showToast("✓ "+file.name+" stored · "+price+" APT per view", "teal");
+          if (onDone) onDone();
+        };
+        reader.readAsDataURL(file);
+      }
+    }, 55);
+  }
+
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    if (e.target.files.length>0) {
+      uploadQueue(Array.from(e.target.files));
+      e.target.value = ''; // reset so same file can be selected again
+    }
+  });
+
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', ()  => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    if (e.dataTransfer.files.length>0) uploadQueue(Array.from(e.dataTransfer.files));
+  });
+
+  // ── UPDATE STATS ──
+  function updateStats() {
+    document.getElementById('statVideos').textContent = videos.length;
+    document.getElementById('statSize').textContent   = totalMB.toFixed(1)+" MB";
+    document.getElementById('statEarned').textContent = totalAPT.toFixed(3)+" APT";
+  }
+
+  // ── UPDATE PROFILE ──
+  function updateProfile() {
+    document.getElementById('profileAddr').textContent = walletAddr || 'not connected';
+    document.getElementById('profileName').textContent = walletAddr ? '🦊 '+walletAddr : 'Connect wallet to view profile';
+    document.getElementById('psVideos').textContent    = videos.length;
+    document.getElementById('psEarned').textContent    = totalAPT.toFixed(3)+' APT';
+
+    document.getElementById('ecTotal').textContent    = totalAPT.toFixed(3)+' APT';
+    document.getElementById('ecPlays').textContent    = totalPlays;
+    document.getElementById('ecAvg').textContent      = totalPlays>0 ? (totalAPT/totalPlays).toFixed(3)+' APT' : '0.000 APT';
+    document.getElementById('ecStorage').textContent  = totalMB.toFixed(1)+' MB';
+    document.getElementById('profileVideoCount').textContent = '// '+videos.length+' videos';
+
+    // Tx list
+    const txList = document.getElementById('txList');
+    if (txHistory.length === 0) {
+      txList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-family:var(--mono);font-size:0.75rem;border:1px dashed var(--border);border-radius:10px;">// no transactions yet</div>';
+    } else {
+      txList.innerHTML = txHistory.slice(0,10).map(tx => `
+        <div class="tx-item">
+          <div class="tx-icon ${tx.type}">${tx.type==='earn'?'💰':'📦'}</div>
+          <div class="tx-details">
+            <div class="tx-desc">${tx.desc}</div>
+            <div class="tx-id">${tx.id}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="tx-amount ${tx.type==='earn'?'pos':'neg'}">${tx.amount}</div>
+            <div class="tx-time">${tx.time}</div>
+          </div>
+        </div>`).join('');
+    }
+
+    // Profile videos grid
+    const pvg = document.getElementById('profileVideosGrid');
+    if (videos.length === 0) {
+      pvg.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted);font-family:var(--mono);font-size:0.75rem;border:1px dashed var(--border);border-radius:10px;">// upload videos to see them here</div>';
+    } else {
+      pvg.innerHTML = videos.map((v,i) => `
+        <div class="video-card" style="animation-delay:${i*0.06}s;cursor:default;">
+          <div class="vthumb">
+            ${v.preview
+              ? (v.type==='video'
+                  ? `<video src="${v.preview}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;"></video>`
+                  : `<img src="${v.preview}" style="width:100%;height:100%;object-fit:cover;">`)
+              : '<div class="vthumb-ph">🎬</div>'}
+            ${v.duration?`<span class="vduration">${v.duration}</span>`:''}
+            <span class="vprice-tag">${v.price} APT</span>
+          </div>
+          <div class="vbody">
+            <div class="vtitle">${v.name}</div>
+            <div class="vmeta">
+              <span class="vblob">${v.blob}</span>
+              <span class="vbadge-chain">on-chain ✓</span>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  // ── COPY ──
+  function copyBlobId() {
+    navigator.clipboard.writeText(currentBlobId).catch(()=>{});
+    showToast("✓ Blob ID copied", "teal");
+  }
+
+  // ── MODAL ──
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key==='Escape') {
+      ['walletModal','payModal'].forEach(id => closeModal(id));
+    }
+  });
+
+  // ── TOAST ──
+  function showToast(msg, type='teal') {
+    const t = document.getElementById('toast');
+    const colors = { teal:'#2DD4BF', green:'#10B981', gold:'#F59E0B', muted:'#5A7A94', red:'#EF4444' };
+    t.textContent = msg;
+    t.style.color = colors[type]||colors.teal;
+    t.style.borderColor = (colors[type]||colors.teal)+'33';
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=>t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>
